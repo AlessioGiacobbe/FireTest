@@ -342,7 +342,7 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
                 Titolo.setText(marker.getTitle());
                 TextView coordinates = (TextView) dialogo.findViewById(R.id.subtitlecoord);
                 coordinates.setText("lat: " + marker.getPosition().latitude + " - long: " + marker.getPosition().latitude);
-                final TextView mail = (TextView) dialogo.findViewById(R.id.mail);
+                final TextView mail = (TextView) dialogo.findViewById(R.id.email);
                 final TextView haiaggiunto = (TextView) dialogo.findViewById(R.id.haaggiunto);
                 final ListView lista = (ListView) dialogo.findViewById(R.id.lista);
                 final DatabaseReference locationref = FirebaseDatabase.getInstance().getReference("locations");
@@ -463,14 +463,14 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
         if(!(Title.getText().toString().matches(""))&& !(latedit.getText().toString().matches("")) && !(longedit.getText().toString().matches(""))) {
 
             try {
-                if(new Double(latedit.getText().toString())>-90 && new Double(latedit.getText().toString()) < 90 && new Double(longedit.getText().toString())>-90 && new Double(longedit.getText().toString())<90) {
+                if(new Double(latedit.getText().toString())>-90 && new Double(latedit.getText().toString()) < 90 && new Double(longedit.getText().toString())>-180 && new Double(longedit.getText().toString())<180) {
                     Location loc = new Location(Title.getText().toString(), new Double(latedit.getText().toString()), new Double(longedit.getText().toString()), user.getEmail());
                     mDatabase.child("locations").child(dateFormat.format(date)).setValue(loc);
                 }else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("Capra!")
 
-                            .setMessage("latitudine e longitudine vanno da -90 a 90 gradi")
+                            .setMessage("latitudine e longitudine vanno rispettivamente da -90 a 90 gradi e da -180 a 180")
 
                             .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {

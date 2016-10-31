@@ -42,17 +42,6 @@
         android:layout_marginLeft="12dp"
         android:layout_below="@id/subtitlecoord"
         />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_below="@id/aggiuntoda"
-        android:textSize="25dp"
-        android:paddingBottom="10dp"
-        android:id="@+id/mail"
-        android:layout_centerHorizontal="true"
-        android:text="satana@gmail.com"
-        android:layout_height="wrap_content" />
-
-
 
 
     <android.support.v7.widget.AppCompatTextView
@@ -65,7 +54,7 @@
         android:paddingBottom="5dp"
         android:textSize="28dp"
         android:layout_marginLeft="12dp"
-        android:layout_below="@id/mail"
+        android:layout_below="@id/email"
         />
 
 
@@ -78,6 +67,16 @@
         android:layout_height="wrap_content">
 
     </ListView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:textSize="20dp"
+        android:paddingBottom="10dp"
+        android:id="@+id/email"
+        android:text="satana@gmail.com"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/aggiuntoda"
+        android:layout_centerHorizontal="true" />
 
 
 </RelativeLayout>
