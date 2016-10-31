@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+
+    <ImageView
+        android:layout_width="400dp"
+        android:layout_height="150dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/materiallow"
+        />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Titolo"
+        android:textSize="32dp"
+        android:id="@+id/infotitle"
+        android:textColor="#FFF"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="80dp"
+        />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#90A4AE"
+        android:id="@+id/subtitlecoord"
+        android:layout_marginLeft="12dp"
+        android:text="lat: 4.324 - long: 4.324"
+        android:paddingBottom="20dp"
+        android:layout_below="@id/infotitle"/>
+
+    <android.support.v7.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Aggiunto da"
+        android:id="@+id/aggiuntoda"
+        android:textStyle="bold"
+        android:paddingBottom="5dp"
+        android:textSize="28dp"
+        android:layout_marginLeft="12dp"
+        android:layout_below="@id/subtitlecoord"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_below="@id/aggiuntoda"
+        android:textSize="25dp"
+        android:paddingBottom="10dp"
+        android:id="@+id/mail"
+        android:layout_centerHorizontal="true"
+        android:text="satana@gmail.com"
+        android:layout_height="wrap_content" />
+
+
+
+
+    <android.support.v7.widget.AppCompatTextView
+        android:layout_marginTop="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ha aggiunto anche"
+        android:id="@+id/haaggiunto"
+        android:textStyle="bold"
+        android:paddingBottom="5dp"
+        android:textSize="28dp"
+        android:layout_marginLeft="12dp"
+        android:layout_below="@id/mail"
+        />
+
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:id="@+id/lista"
+        android:layout_below="@id/haaggiunto"
+        android:layout_height="wrap_content">
+
+    </ListView>
+
+
+</RelativeLayout>
