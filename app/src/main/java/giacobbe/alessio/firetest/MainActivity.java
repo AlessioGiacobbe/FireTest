@@ -1,10 +1,12 @@
 package giacobbe.alessio.firetest;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -74,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         };
 
 
+
+
         Button Glogin = (Button) findViewById(R.id.Glogin);
         Glogin.setOnClickListener(this);
         Button MailLogin = (Button) findViewById(R.id.loginbtn);
@@ -101,26 +105,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void MailSignIn(){
         EditText mail = (EditText) findViewById(R.id.input_mail);
         EditText pwd = (EditText) findViewById(R.id.input_password);
-        mAuth.signInWithEmailAndPassword(mail.getText().toString(), pwd.getText().toString())
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d("FireBase", "signInWithEmail:onComplete:" + task.isSuccessful());
+        try {
+            mAuth.signInWithEmailAndPassword(mail.getText().toString(), pwd.getText().toString())
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            Log.d("FireBase", "signInWithEmail:onComplete:" + task.isSuccessful());
 
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Log.w("FireBase", "signInWithEmail:failed", task.getException());
-                            Snackbar snackbar = Snackbar
-                                    .make(findViewById(android.R.id.content), "Accesso non riuscito :( ", Snackbar.LENGTH_LONG);
+                            // If sign in fails, display a message to the user. If sign in succeeds
+                            // the auth state listener will be notified and logic to handle the
+                            // signed in user can be handled in the listener.
+                            if (!task.isSuccessful()) {
+                                Log.w("FireBase", "signInWithEmail:failed", task.getException());
+                                Snackbar snackbar = Snackbar
+                                        .make(findViewById(android.R.id.content), "Accesso non riuscito :( ", Snackbar.LENGTH_LONG);
 
-                            snackbar.show();
+                                snackbar.show();
+                            }
+
+                            // ...
                         }
+                    });
+        }catch(Exception e){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Qualcosa non va!")
 
-                        // ...
-                    }
-                });
+                    .setMessage("Probabilmente hai sbagliato ad inserire il testo, anche se non è poi così difficle...")
+
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User cancelled the dialog
+                        }
+                    });
+            // Create the AlertDialog object and return it
+            builder.create();
+            builder.show();
+        }
     }
 
     @Override

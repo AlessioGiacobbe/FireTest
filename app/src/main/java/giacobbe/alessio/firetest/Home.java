@@ -2,6 +2,7 @@ package giacobbe.alessio.firetest;
 
 import android.*;
 import android.Manifest;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,8 +18,12 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.entire.sammalik.samlocationandgeocoding.SamLocationRequestService;
@@ -32,6 +37,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.vision.text.Text;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -64,6 +70,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static giacobbe.alessio.firetest.R.id.map;
+
 
 public class Home extends FragmentActivity implements OnMapReadyCallback, View.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback {
 
@@ -71,6 +79,8 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
     SamLocationRequestService samLocationRequestService;
     private DatabaseReference mDatabase;
     public FirebaseUser user;
+    public Double currentlat, currentlong;
+    public String currentTitle;
     private ArrayList<Marker> mMarkerArray = new ArrayList<Marker>();
     public EditText latedit, longedit;
     private final PermissionManager permissionManager = PermissionManager.create(this);
@@ -85,7 +95,7 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
         setContentView(R.layout.activity_home);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(map);
         mapFragment.getMapAsync(this);
         user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -146,7 +156,6 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
 
 
 
-
         Button Submitbtn = (Button) findViewById(R.id.submit);
 
         Submitbtn.setOnClickListener(this);
@@ -185,7 +194,7 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
                                 .setAction("MOSTRA", new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
-                                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(nuova.Latitude, nuova.Longitude), 14));
+                                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(nuova.Latitude, nuova.Longitude), 10));
                                     }
                                 });
 
@@ -229,7 +238,6 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
                 latedit.setText(String.valueOf(location.getLatitude()));
                 longedit.setText(String.valueOf(location.getLongitude()));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 16));
-                Log.d("muovo la cmaera", "");
                 samLocationRequestService.stopLocationUpdates();
             }
 
@@ -241,7 +249,7 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
         LatLng location = new LatLng(mark.Latitude, mark.Longitude);
         Marker marcatore =  mMap.addMarker(new MarkerOptions()
                                         .position(location)
-                                        .snippet("caricato da " + mark.UserName)
+                                        .snippet("premi per maggiori informazioni")
                                         .title(mark.Title));
 
         mMarkerArray.add(marcatore);
@@ -256,8 +264,54 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
     @Override
     public void onResume(){
         super.onResume();
-        // put your code here...
 
+    }
+
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        Log.d("riprendo", "");
+        EditText Title = (EditText) findViewById(R.id.input_Title);
+        EditText latin = (EditText) findViewById(R.id.input_lat);
+        EditText longin = (EditText) findViewById(R.id.input_long);
+        try {
+            Title.setText(savedInstanceState.getString("title"));
+            latin.setText(String.valueOf(savedInstanceState.getDouble("lat")));
+            longin.setText(String.valueOf(savedInstanceState.getDouble("long")));
+        }catch(Exception e){
+
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();  // Always call the superclass method first
+
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+
+        EditText Title = (EditText) findViewById(R.id.input_Title);
+        EditText latin = (EditText) findViewById(R.id.input_lat);
+        EditText longin = (EditText) findViewById(R.id.input_long);
+        try {
+
+            savedInstanceState.putString("title", Title.getText().toString());
+            savedInstanceState.putDouble("lat", Double.valueOf(latin.getText().toString()));
+            savedInstanceState.putDouble("long", Double.valueOf(longin.getText().toString()));
+
+        }catch (Exception e){
+
+        }
+        // etc.
     }
 
     /**
@@ -273,10 +327,128 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        //LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Log.d("click", ":)");
+                final Dialog dialogo =  new Dialog(Home.this);
+                dialogo.setContentView(R.layout.infodialog);
+                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                lp.copyFrom(dialogo.getWindow().getAttributes());
+                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+
+                final TextView Titolo = (TextView) dialogo.findViewById(R.id.infotitle);
+                Titolo.setText(marker.getTitle());
+                TextView coordinates = (TextView) dialogo.findViewById(R.id.subtitlecoord);
+                coordinates.setText("lat: " + marker.getPosition().latitude + " - long: " + marker.getPosition().latitude);
+                final TextView mail = (TextView) dialogo.findViewById(R.id.mail);
+                final TextView haiaggiunto = (TextView) dialogo.findViewById(R.id.haaggiunto);
+                final ListView lista = (ListView) dialogo.findViewById(R.id.lista);
+                final DatabaseReference locationref = FirebaseDatabase.getInstance().getReference("locations");
+                ArrayList<Location> arrayOfUsers = new ArrayList<Location>();
+                final locationadapter adapter = new locationadapter(Home.this, arrayOfUsers);
+                lista.setAdapter(adapter);
+                lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(adapter.getItem(position).Latitude , adapter.getItem(position).Longitude), 10));
+                        dialogo.dismiss();
+                    }
+                });
+
+                locationref.orderByChild("Title").equalTo(marker.getTitle()).addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        Location trovata = dataSnapshot.getValue(Location.class);
+                        if (trovata.UserName.equals(user.getEmail())){
+                            mail.setText("Te!");
+                            haiaggiunto.setText("Hai aggiunto anche");
+                        }else {
+                            mail.setText(trovata.UserName);
+                            haiaggiunto.setText("Ha aggiunto anche");
+
+                        }
+                        locationref.orderByChild("UserName").equalTo(trovata.UserName).addChildEventListener(new ChildEventListener() {
+                            @Override
+                            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                                Location loc = dataSnapshot.getValue(Location.class);
+                                if (!loc.Title.equals(Titolo.getText())) {
+                                    adapter.add(loc);
+                                }
+                            }
+
+                            @Override
+                            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                            }
+
+                            @Override
+                            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                            }
+
+                            @Override
+                            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+
+                dialogo.show();
+                dialogo.getWindow().setAttributes(lp);
+            }
+        });
+       /* mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+
+            // Use default InfoWindow frame
+            @Override
+            public View getInfoWindow(Marker args) {
+                return null;
+            }
+
+            // Defines the contents of the InfoWindow
+            @Override
+            public View getInfoContents(Marker arg0) {
+                View v = getLayoutInflater().inflate(R.layout.infoboxlayout, null);
+
+                TextView titolo = (TextView) v.findViewById(R.id.infotitle);
+                titolo.setText(arg0.getTitle());
+                TextView sottotiolo = (TextView) v.findViewById(R.id.sottotitolo);
+                sottotiolo.setText("clicca per maggiori informazioni");
+
+
+
+                return v;
+            }
+        });*/
     }
 
     public void additem(){
@@ -284,14 +456,31 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
         EditText Title = (EditText) findViewById(R.id.input_Title);
 
 
+
+
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         Date date = new Date();
         if(!(Title.getText().toString().matches(""))&& !(latedit.getText().toString().matches("")) && !(longedit.getText().toString().matches(""))) {
 
             try {
-                Location loc = new Location(Title.getText().toString(), new Double(latedit.getText().toString()), new Double(longedit.getText().toString()), user.getEmail());
-                mDatabase.child("locations").child(dateFormat.format(date)).setValue(loc);
+                if(new Double(latedit.getText().toString())>-90 && new Double(latedit.getText().toString()) < 90 && new Double(longedit.getText().toString())>-90 && new Double(longedit.getText().toString())<90) {
+                    Location loc = new Location(Title.getText().toString(), new Double(latedit.getText().toString()), new Double(longedit.getText().toString()), user.getEmail());
+                    mDatabase.child("locations").child(dateFormat.format(date)).setValue(loc);
+                }else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Capra!")
 
+                            .setMessage("latitudine e longitudine vanno da -90 a 90 gradi")
+
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    // User cancelled the dialog
+                                }
+                            });
+                    // Create the AlertDialog object and return it
+                    builder.create();
+                    builder.show();
+                }
                 Title.setText(" ");
             }catch(Exception e){
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -329,6 +518,9 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
     {
         // code here to show dialog
     }
+
+
+
 
 
 

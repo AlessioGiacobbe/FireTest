@@ -27,6 +27,7 @@
 
         <EditText
             android:id="@+id/input_Title"
+            android:lines="1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="#26A69A"
@@ -41,6 +42,7 @@
         android:layout_marginLeft="21dp"
         android:layout_marginRight="20dp"
         android:id="@+id/input_layout_lat"
+
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -48,6 +50,7 @@
             android:id="@+id/input_lat"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:lines="1"
             android:textColor="#4DB6AC"
 
             android:hint="Latituidine" />
@@ -69,6 +72,7 @@
             android:id="@+id/input_long"
             android:layout_width="match_parent"
             android:textColor="#4DB6AC"
+            android:lines="1"
             android:layout_height="wrap_content"
             android:hint="Longitudine" />
 
