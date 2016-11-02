@@ -186,7 +186,14 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-
+                final Location nuova = dataSnapshot.getValue(Location.class);
+                mMap.clear();
+                isFirstLaunch = true;
+                populate();
+                Snackbar snackbar = Snackbar
+                        .make(findViewById(android.R.id.content), nuova.Title + " rimosso", Snackbar.LENGTH_LONG)
+                        ;
+                snackbar.show();
             }
 
             @Override
