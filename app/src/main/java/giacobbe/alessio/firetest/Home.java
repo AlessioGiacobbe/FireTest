@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.LocationManager;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -22,6 +23,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -79,8 +81,8 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
     SamLocationRequestService samLocationRequestService;
     private DatabaseReference mDatabase;
     public FirebaseUser user;
-    public Double currentlat, currentlong;
-    public String currentTitle;
+    public DatabaseReference locationref;
+    public String nodetitle;
     private ArrayList<Marker> mMarkerArray = new ArrayList<Marker>();
     public EditText latedit, longedit;
     private final PermissionManager permissionManager = PermissionManager.create(this);
@@ -104,32 +106,8 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        final DatabaseReference locationref = FirebaseDatabase.getInstance().getReference("locations");
 
-        locationref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (isFirstLaunch) {
-                    Log.e("count ", String.valueOf(dataSnapshot.getChildrenCount()));
-                    int i = 0;
-                    for (DataSnapshot locations : dataSnapshot.getChildren()) {
-                        Location posizioni = locations.getValue(Location.class);
-                        Log.d("posizione " + i + " ", posizioni.Title);
-
-                        i++;
-                        addmark(posizioni);
-                    }
-                    isFirstLaunch = false;
-                    addTrigger();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
+        populate();
 
         PackageManager pm = this.getPackageManager();
         int hasPerm = pm.checkPermission(
@@ -171,18 +149,14 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
 
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.d("aggiunto", "dasd");
                 final Location nuova = dataSnapshot.getValue(Location.class);
                 boolean isenabled = true;
                 for (Marker marcatore: mMarkerArray){
-                    Log.d("titolo ", marcatore.getTitle());
                     if(marcatore.getTitle().equals(nuova.Title)){
                         isenabled = false;
                     }
                 }
-                Log.d("abilitato", String.valueOf(isenabled));
                 if (nuova.Latitude != null && isenabled) {
-                    Log.d("AAAAh", nuova.Latitude.toString());
                     if (nuova.UserName == user.getEmail()) {
                         Snackbar snackbar = Snackbar
                                 .make(findViewById(android.R.id.content), nuova.Title + " Aggiunto", Snackbar.LENGTH_LONG);
@@ -207,7 +181,6 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Log.d("cambiato", "dsad");
 
             }
 
@@ -330,13 +303,31 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                Log.d("click", ":)");
                 final Dialog dialogo =  new Dialog(Home.this);
                 dialogo.setContentView(R.layout.infodialog);
                 WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
                 lp.copyFrom(dialogo.getWindow().getAttributes());
                 lp.width = WindowManager.LayoutParams.MATCH_PARENT;
                 lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+
+                final ImageView delete = (ImageView) dialogo.findViewById(R.id.delete);
+                locationref = FirebaseDatabase.getInstance().getReference("admin");
+                locationref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot data: dataSnapshot.getChildren()){
+                            if(data.getValue().toString().equals(user.getEmail())){
+                               delete.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
 
                 final TextView Titolo = (TextView) dialogo.findViewById(R.id.infotitle);
                 Titolo.setText(marker.getTitle());
@@ -345,7 +336,7 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
                 final TextView mail = (TextView) dialogo.findViewById(R.id.email);
                 final TextView haiaggiunto = (TextView) dialogo.findViewById(R.id.haaggiunto);
                 final ListView lista = (ListView) dialogo.findViewById(R.id.lista);
-                final DatabaseReference locationref = FirebaseDatabase.getInstance().getReference("locations");
+                locationref = FirebaseDatabase.getInstance().getReference("locations");
                 ArrayList<Location> arrayOfUsers = new ArrayList<Location>();
                 final locationadapter adapter = new locationadapter(Home.this, arrayOfUsers);
                 lista.setAdapter(adapter);
@@ -360,6 +351,7 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
                 locationref.orderByChild("Title").equalTo(marker.getTitle()).addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        nodetitle = dataSnapshot.getKey();
                         Location trovata = dataSnapshot.getValue(Location.class);
                         if (trovata.UserName.equals(user.getEmail())){
                             mail.setText("Te!");
@@ -422,33 +414,50 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
                 });
 
 
+                delete.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        locationref = FirebaseDatabase.getInstance().getReference("locations");
+                        locationref.child(nodetitle).removeValue();
+                        mMap.clear();
+                        isFirstLaunch = true;
+                        populate();
+                        dialogo.dismiss();
+                    }
+                });
+
                 dialogo.show();
                 dialogo.getWindow().setAttributes(lp);
             }
         });
-       /* mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+    }
 
-            // Use default InfoWindow frame
+    public void populate(){
+        final DatabaseReference locationref = FirebaseDatabase.getInstance().getReference("locations");
+
+        locationref.addValueEventListener(new ValueEventListener() {
             @Override
-            public View getInfoWindow(Marker args) {
-                return null;
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (isFirstLaunch) {
+                    Log.e("count ", String.valueOf(dataSnapshot.getChildrenCount()));
+                    int i = 0;
+                    for (DataSnapshot locations : dataSnapshot.getChildren()) {
+                        Location posizioni = locations.getValue(Location.class);
+                        Log.d("posizione " + i + " ", posizioni.Title);
+
+                        i++;
+                        addmark(posizioni);
+                    }
+                    isFirstLaunch = false;
+                    addTrigger();
+                }
             }
 
-            // Defines the contents of the InfoWindow
             @Override
-            public View getInfoContents(Marker arg0) {
-                View v = getLayoutInflater().inflate(R.layout.infoboxlayout, null);
+            public void onCancelled(DatabaseError databaseError) {
 
-                TextView titolo = (TextView) v.findViewById(R.id.infotitle);
-                titolo.setText(arg0.getTitle());
-                TextView sottotiolo = (TextView) v.findViewById(R.id.sottotitolo);
-                sottotiolo.setText("clicca per maggiori informazioni");
-
-
-
-                return v;
             }
-        });*/
+        });
     }
 
     public void additem(){
