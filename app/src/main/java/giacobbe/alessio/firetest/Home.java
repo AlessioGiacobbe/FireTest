@@ -480,7 +480,11 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
 
             try {
                 if(new Double(latedit.getText().toString())>-90 && new Double(latedit.getText().toString()) < 90 && new Double(longedit.getText().toString())>-180 && new Double(longedit.getText().toString())<180) {
-                    Location loc = new Location(Title.getText().toString(), new Double(latedit.getText().toString()), new Double(longedit.getText().toString()), user.getEmail());
+                    String titolo = Title.getText().toString();
+                    if(String.valueOf(titolo.charAt(0)).equals(" ")){
+                        titolo = titolo.substring(1);
+                    }
+                    Location loc = new Location(titolo, new Double(latedit.getText().toString()), new Double(longedit.getText().toString()), user.getEmail());
                     mDatabase.child("locations").child(dateFormat.format(date)).setValue(loc);
                 }else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
