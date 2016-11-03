@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:id="@+id/input_layout_Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/input_Title"
+            android:lines="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#26A69A"
+
+            android:textSize="32dp"
+            android:hint="Titolo" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_below="@id/input_layout_Title"
+        android:layout_marginLeft="21dp"
+        android:layout_marginRight="20dp"
+        android:id="@+id/input_layout_lat"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/input_lat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lines="1"
+            android:textColor="#4DB6AC"
+
+            android:hint="Latituidine" />
+
+    </android.support.design.widget.TextInputLayout>
+
+
+
+    <android.support.design.widget.TextInputLayout
+        android:paddingTop="5dp"
+        android:layout_below="@id/input_layout_lat"
+        android:layout_marginLeft="21dp"
+        android:layout_marginRight="20dp"
+        android:id="@+id/input_layout_long"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/input_long"
+            android:layout_width="match_parent"
+            android:textColor="#4DB6AC"
+            android:lines="1"
+            android:layout_height="wrap_content"
+            android:hint="Longitudine" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="42dp"
+        android:id="@+id/submit"
+        android:background="#009688"
+        android:elevation="25dp"
+        android:textSize="15dp"
+        android:textColor="#B2DFDB"
+        android:text="Invia"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        />
+</RelativeLayout>

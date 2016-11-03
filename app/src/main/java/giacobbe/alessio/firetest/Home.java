@@ -21,10 +21,12 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +38,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -65,12 +68,14 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.messaging.RemoteMessage;
+import com.piotrek.customspinner.CustomSpinner;
 
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static giacobbe.alessio.firetest.R.id.map;
 
@@ -89,12 +94,13 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
 
     LocationManager mLocationManager;
     public boolean isFirstLaunch = true;
-
+    private String[] arraySpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(map);
@@ -106,7 +112,7 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-
+        populatespinner();
         populate();
 
         PackageManager pm = this.getPackageManager();
@@ -225,14 +231,67 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
         });
     }
 
+    public void populatespinner(){
+        final List<String> types = new ArrayList<String>();
+        locationref = FirebaseDatabase.getInstance().getReference("types");
+        locationref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot data: dataSnapshot.getChildren()) {
+                    types.add(data.getValue().toString());
+                }
+                CustomSpinner custom = (CustomSpinner) findViewById(R.id.typespinner);
+                String[] tipi = new String[types.size()];
+                tipi =  types.toArray(tipi);
+                custom.initializeStringValues(tipi, "seleziona il tipo");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
     public void addmark(Location mark){
         LatLng location = new LatLng(mark.Latitude, mark.Longitude);
+
         Marker marcatore =  mMap.addMarker(new MarkerOptions()
                                         .position(location)
                                         .snippet("premi per maggiori informazioni")
                                         .title(mark.Title));
 
+        switch (mark.type){
+            case "wifi":
+                marcatore.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_wifi_white_24dp));
+                break;
+            case "parcheggi":
+                marcatore.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_local_parking_white_24dp));
+                break;
+            case "wc pubblici":
+                marcatore.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_wc_white_24dp));
+                break;
+            case "fontanelle":
+                marcatore.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_opacity_white_24dp));
+                break;
+            default:
+                break;
+
+        }
+
         mMarkerArray.add(marcatore);
+    }
+
+
+    public int resolveicon(String name){
+        int current = R.drawable.cast_ic_notification_pause;
+        switch (name){
+
+        }
+
+        return current;
     }
 
 
@@ -472,7 +531,7 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
         EditText Title = (EditText) findViewById(R.id.input_Title);
 
 
-
+        CustomSpinner spinner = (CustomSpinner) findViewById(R.id.typespinner);
 
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         Date date = new Date();
@@ -484,8 +543,25 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
                     if(String.valueOf(titolo.charAt(0)).equals(" ")){
                         titolo = titolo.substring(1);
                     }
-                    Location loc = new Location(titolo, new Double(latedit.getText().toString()), new Double(longedit.getText().toString()), user.getEmail());
-                    mDatabase.child("locations").child(dateFormat.format(date)).setValue(loc);
+                    if (spinner.getSelectedItem().toString().equals("seleziona il tipo")){
+                        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                        builder.setTitle("Hey!")
+
+                                .setMessage("devi scegliere il tipo di posto che vuoi aggiungere.")
+
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        // User cancelled the dialog
+                                    }
+                                });
+                        // Create the AlertDialog object and return it
+                        builder.create();
+                        builder.show();
+                    }else {
+                        Location loc = new Location(titolo, new Double(latedit.getText().toString()), new Double(longedit.getText().toString()), user.getEmail(), spinner.getSelectedItem().toString());
+
+                        mDatabase.child("locations").child(dateFormat.format(date)).setValue(loc);
+                    }
                 }else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("Capra!")

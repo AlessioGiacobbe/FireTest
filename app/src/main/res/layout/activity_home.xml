@@ -65,6 +65,7 @@
         android:layout_marginLeft="21dp"
         android:layout_marginRight="20dp"
         android:id="@+id/input_layout_long"
+        android:paddingBottom="25dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -77,6 +78,15 @@
             android:hint="Longitudine" />
 
     </android.support.design.widget.TextInputLayout>
+
+    <com.piotrek.customspinner.CustomSpinner
+        android:layout_width="wrap_content"
+        android:id="@+id/typespinner"
+        android:layout_below="@id/input_layout_long"
+        android:layout_marginLeft="21dp"
+
+        android:layout_height="wrap_content">
+    </com.piotrek.customspinner.CustomSpinner>
 
     <Button
         android:layout_width="wrap_content"
