@@ -47,17 +47,6 @@
         android:layout_toRightOf="@id/typeimage"
         />
 
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="100dp"
-        android:visibility="gone"
-        android:id="@+id/delete"
-        android:layout_alignParentRight="true"
-        android:src="@drawable/ic_delete_white_24dp"
-        />
-
     <android.support.v7.widget.AppCompatTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -118,6 +107,16 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/aggiuntoda"
         android:layout_centerHorizontal="true" />
+
+    <ImageView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="90dp"
+        android:id="@+id/delete"
+        android:src="@drawable/ic_delete_white_24dp"
+        />
 
 
 </RelativeLayout>

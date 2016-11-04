@@ -409,7 +409,13 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
                 final TextView Titolo = (TextView) dialogo.findViewById(R.id.infotitle);
                 Titolo.setText(marker.getTitle());
                 TextView coordinates = (TextView) dialogo.findViewById(R.id.subtitlecoord);
-                coordinates.setText("lat: " + marker.getPosition().latitude + " - long: " + marker.getPosition().latitude);
+                String lat = String.valueOf(marker.getPosition().latitude);
+                String longi = String.valueOf(marker.getPosition().longitude);
+                if (lat.length() > 8) {
+                    lat = lat.substring(0, 8);
+                    longi = longi.substring(0, 8);
+                }
+                coordinates.setText("lat: " + lat + " - long: " + longi);
                 final TextView mail = (TextView) dialogo.findViewById(R.id.email);
                 final TextView haiaggiunto = (TextView) dialogo.findViewById(R.id.haaggiunto);
                 final ListView lista = (ListView) dialogo.findViewById(R.id.lista);
