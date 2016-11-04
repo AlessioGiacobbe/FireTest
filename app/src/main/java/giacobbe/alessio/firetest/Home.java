@@ -108,7 +108,6 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
                 .findFragmentById(map);
         mapFragment.getMapAsync(this);
         user = FirebaseAuth.getInstance().getCurrentUser();
-
         latedit = (EditText) findViewById(R.id.input_lat);
         longedit = (EditText) findViewById(R.id.input_long);
 
