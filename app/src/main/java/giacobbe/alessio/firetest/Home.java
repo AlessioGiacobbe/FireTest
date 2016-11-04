@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
+import android.location.Geocoder;
 import android.location.LocationManager;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
@@ -76,6 +77,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import static giacobbe.alessio.firetest.R.id.map;
 
@@ -265,16 +267,16 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
 
         switch (mark.type){
             case "wifi":
-                marcatore.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_wifi_white_24dp));
+                marcatore.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_signal_wifi_3_bar_blue_grey_600_24dp));
                 break;
             case "parcheggi":
-                marcatore.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_local_parking_white_24dp));
+                marcatore.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_local_parking_blue_grey_600_24dp));
                 break;
             case "wc pubblici":
-                marcatore.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_wc_white_24dp));
+                marcatore.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_wc_blue_grey_600_24dp));
                 break;
             case "fontanelle":
-                marcatore.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_opacity_white_24dp));
+                marcatore.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_opacity_blue_grey_600_24dp));
                 break;
             default:
                 break;
@@ -366,6 +368,14 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                latedit.setText(String.valueOf(latLng.latitude));
+                longedit.setText(String.valueOf(latLng.longitude));
+            }
+        });
+
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
@@ -394,7 +404,8 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
                     }
                 });
 
-
+                final ImageView tipo = (ImageView) dialogo.findViewById(R.id.typeimage);
+                final TextView tipotitle = (TextView) dialogo.findViewById(R.id.typestring);
                 final TextView Titolo = (TextView) dialogo.findViewById(R.id.infotitle);
                 Titolo.setText(marker.getTitle());
                 TextView coordinates = (TextView) dialogo.findViewById(R.id.subtitlecoord);
@@ -419,6 +430,29 @@ public class Home extends FragmentActivity implements OnMapReadyCallback, View.O
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         nodetitle = dataSnapshot.getKey();
                         Location trovata = dataSnapshot.getValue(Location.class);
+
+                        switch (trovata.type){
+                            case "wifi":
+                                tipo.setImageResource(R.drawable.ic_signal_wifi_3_bar_white_24dp);
+                                tipotitle.setText("wifi");
+                                break;
+                            case "parcheggi":
+                                tipo.setImageResource(R.drawable.ic_local_parking_white_24dp);
+                                tipotitle.setText("parcheggio");
+                                break;
+                            case "wc pubblici":
+                                tipo.setImageResource(R.drawable.ic_wc_white_24dp);
+                                tipotitle.setText("bagni pubblici");
+                                break;
+                            case "fontanelle":
+                                tipo.setImageResource(R.drawable.ic_opacity_white_24dp);
+                                tipotitle.setText("fontanelle");
+                                break;
+                            default:
+                                break;
+
+                        }
+
                         if (trovata.UserName.equals(user.getEmail())){
                             mail.setText("Te!");
                             haiaggiunto.setText("Hai aggiunto anche");
