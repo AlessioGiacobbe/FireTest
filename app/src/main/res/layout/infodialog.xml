@@ -63,8 +63,11 @@
         android:layout_height="wrap_content"
         android:textColor="#90A4AE"
         android:id="@+id/subtitlecoord"
+        android:textSize="13dp"
         android:layout_marginLeft="12dp"
-        android:text="lat: 4.324 - long: 4.324"
+        android:maxLines="1"
+        android:maxWidth="340dp"
+        android:text="lat: 4.324 - long:4.323232323232323232323232323234"
         android:paddingBottom="20dp"
         android:layout_below="@id/infotitle"/>
 
